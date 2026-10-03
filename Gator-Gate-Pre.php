@@ -71,6 +71,9 @@ function bbp_pre_paste_box() {
         function ed() {
             return window.tinyMCE && (tinyMCE.get('bbp_topic_content') || tinyMCE.get('bbp_reply_content'));
         }
+        function inPanel(node) {
+            return !!(node && panel.contains(node));
+        }
         function inPre(e, node) {
             try {
                 return !!(e && e.selection && e.dom.getParent(node || e.selection.getNode(), 'pre'));
@@ -133,7 +136,7 @@ function bbp_pre_paste_box() {
                 clearBuffer();
                 window.bbpOpenPrePanel();
             });
-            e.on('contextmenu', function (ev) {
+            e.on('contextmenu', function () {
                 if (!inPre(e)) return;
                 clearBuffer();
             });
@@ -159,11 +162,8 @@ function bbp_pre_paste_box() {
             });
         }
         document.addEventListener('keydown', function (ev) {
+            if (inPanel(ev.target)) return;
             if (!(ev.ctrlKey || ev.metaKey) || String(ev.key).toLowerCase() !== 'v') return;
-            if (ev.target === input) {
-                setTimeout(clearBuffer, 0);
-                return;
-            }
             var e = ed();
             if (!e || !inPre(e)) return;
             ev.preventDefault();
@@ -171,12 +171,14 @@ function bbp_pre_paste_box() {
             clearBuffer();
             window.bbpOpenPrePanel();
         }, true);
-        document.addEventListener('contextmenu', function () {
+        document.addEventListener('contextmenu', function (ev) {
+            if (inPanel(ev.target)) return;
             var e = ed();
             if (!e || !inPre(e)) return;
             clearBuffer();
         }, true);
         document.addEventListener('mousedown', function (ev) {
+            if (inPanel(ev.target)) return;
             var e = ed();
             if (!e || !inPre(e) || !ev.target.closest) return;
             var box = ev.target.closest('.mce-listbox');
@@ -211,7 +213,6 @@ function bbp_pre_paste_box() {
                 var ta = document.getElementById('bbp_topic_content') || document.getElementById('bbp_reply_content');
                 if (ta) ta.value += (ta.value ? '\n\n' : '') + '<pre>' + esc(text) + '</pre>';
             }
-            clearBuffer();
             close();
         };
     })();
