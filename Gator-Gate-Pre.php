@@ -121,6 +121,7 @@ function bbp_pre_paste_box() {
             e.on('keydown', function (ev) {
                 if ((ev.ctrlKey || ev.metaKey) && String(ev.key).toLowerCase() === 'v' && inPre(e)) {
                     ev.preventDefault();
+                    ev.stopPropagation();
                     clearBuffer();
                     window.bbpOpenPrePanel();
                 }
@@ -132,7 +133,7 @@ function bbp_pre_paste_box() {
                 clearBuffer();
                 window.bbpOpenPrePanel();
             });
-            e.on('contextmenu', function () {
+            e.on('contextmenu', function (ev) {
                 if (!inPre(e)) return;
                 clearBuffer();
             });
@@ -147,7 +148,7 @@ function bbp_pre_paste_box() {
                     window.bbpOpenPrePanel();
                     return false;
                 }
-                if (cmd === 'FormatBlock' || cmd === 'mceToggleFormat' || cmd === 'mceBlockQuote' || /^h[1-6]$/i.test(val)) {
+                if (cmd === 'FormatBlock' || cmd === 'mceToggleFormat' || cmd === 'mceBlockQuote' || cmd === 'FontName' || cmd === 'FontSize' || /^h[1-6]$/i.test(val)) {
                     ev.preventDefault();
                     ev.stopImmediatePropagation();
                     return false;
@@ -157,6 +158,24 @@ function bbp_pre_paste_box() {
                 dimFormat(e, inPre(e));
             });
         }
+        document.addEventListener('keydown', function (ev) {
+            if (!(ev.ctrlKey || ev.metaKey) || String(ev.key).toLowerCase() !== 'v') return;
+            if (ev.target === input) {
+                setTimeout(clearBuffer, 0);
+                return;
+            }
+            var e = ed();
+            if (!e || !inPre(e)) return;
+            ev.preventDefault();
+            ev.stopPropagation();
+            clearBuffer();
+            window.bbpOpenPrePanel();
+        }, true);
+        document.addEventListener('contextmenu', function () {
+            var e = ed();
+            if (!e || !inPre(e)) return;
+            clearBuffer();
+        }, true);
         document.addEventListener('mousedown', function (ev) {
             var e = ed();
             if (!e || !inPre(e) || !ev.target.closest) return;
