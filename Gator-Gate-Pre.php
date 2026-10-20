@@ -10,17 +10,50 @@
  */
 
 
-
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-add_filter( 'bbp_after_get_the_content_parse_args', function ( $args ) {
-    $args['tinymce']   = true;
-    $args['quicktags'] = true;
-    $args['teeny']     = false;
-    return $args;
+add_filter( 'bbp_use_wp_editor', '__return_true' );
+
+add_filter( 'user_can_richedit', function ( $can ) {
+    if ( function_exists( 'is_bbpress' ) && is_bbpress() ) {
+        return true;
+    }
+    return $can;
 } );
+
+function gator_gate_enable_bbpress_visual_editor( $args = array() ) {
+    $args['tinymce']        = true;
+    $args['teeny']          = false;
+    $args['quicktags']      = true;
+    $args['default_editor'] = 'tinymce';
+    return $args;
+}
+
+add_filter(
+    'bbp_after_get_the_content_parse_args',
+    'gator_gate_enable_bbpress_visual_editor'
+);
+
+add_filter( 'wp_editor_settings', function ( $settings, $editor_id ) {
+    if ( ! in_array( $editor_id, array( 'bbp_topic_content', 'bbp_reply_content' ), true ) ) {
+        return $settings;
+    }
+    $settings['tinymce']        = true;
+    $settings['quicktags']      = true;
+    $settings['teeny']          = false;
+    $settings['default_editor'] = 'tinymce';
+    return $settings;
+}, 20, 2 );
+
+add_filter( 'tiny_mce_before_init', function ( $init, $editor_id ) {
+    if ( ! in_array( $editor_id, array( 'bbp_topic_content', 'bbp_reply_content' ), true ) ) {
+        return $init;
+    }
+    $init['block_formats'] = 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Heading 5=h5;Heading 6=h6';
+    return $init;
+}, 20, 2 );
 
 add_filter( 'mce_buttons', function ( $buttons ) {
     if ( function_exists( 'is_bbpress' ) && is_bbpress() && ! in_array( 'bbp_pre', $buttons, true ) ) {
@@ -41,7 +74,84 @@ add_action( 'wp_ajax_nopriv_bbp_pre_plugin', 'bbp_pre_plugin_js' );
 function bbp_pre_plugin_js() {
     nocache_headers();
     header( 'Content-Type: application/javascript; charset=UTF-8' );
-    echo 'tinymce.PluginManager.add("bbp_pre",function(ed){ed.addButton("bbp_pre",{text:"Pre",tooltip:"Paste preformatted text",onclick:function(){if(window.bbpOpenPrePanel)window.bbpOpenPrePanel();}});});';
+    echo <<<'JS'
+tinymce.PluginManager.add("bbp_pre", function (ed) {
+    ed.addButton("bbp_pre", {
+        text: "Pre",
+        tooltip: "Paste preformatted text",
+        onclick: function () {
+            if (window.bbpOpenPrePanel) window.bbpOpenPrePanel();
+        }
+    });
+
+    function inPre() {
+        try {
+            return !!(ed.selection && ed.dom.getParent(ed.selection.getNode(), "pre"));
+        } catch (err) {
+            return false;
+        }
+    }
+    function open() {
+        if (window.bbpOpenPrePanel) window.bbpOpenPrePanel();
+    }
+    function isPasteKey(ev) {
+        if (!ev || !(ev.ctrlKey || ev.metaKey) || ev.altKey || ev.shiftKey) return false;
+        return String(ev.key || "").toLowerCase() === "v" || ev.keyCode === 86 || ev.which === 86;
+    }
+    function block(ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        if (ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+    }
+    function bindFrame() {
+        var win = ed.getWin && ed.getWin();
+        var doc = ed.getDoc && ed.getDoc();
+        if (!win || !doc || win._bbpPre) return;
+        win._bbpPre = true;
+        win.addEventListener("keydown", function (ev) {
+            if (!isPasteKey(ev) || !inPre()) return;
+            block(ev);
+            open();
+        }, true);
+        win.addEventListener("paste", function (ev) {
+            if (!inPre()) return;
+            block(ev);
+            open();
+        }, true);
+        doc.addEventListener("paste", function (ev) {
+            if (!inPre()) return;
+            block(ev);
+            open();
+        }, true);
+    }
+
+    ed.on("PastePreProcess", function (e) {
+        if (!inPre()) return;
+        e.content = "";
+        if (e.preventDefault) e.preventDefault();
+        open();
+    });
+    ed.on("PastePostProcess", function () {
+        if (!inPre()) return;
+        if (ed.undoManager && ed.undoManager.hasUndo && ed.undoManager.hasUndo()) {
+            ed.undoManager.undo();
+        }
+        open();
+    });
+    ed.on("BeforeExecCommand", function (ev) {
+        var cmd = String(ev.command || "");
+        if (!inPre()) return;
+        if (/^mcePaste/i.test(cmd) || cmd === "Paste") {
+            block(ev);
+            open();
+            return false;
+        }
+    }, true);
+    ed.on("init", bindFrame);
+    bindFrame();
+    if (window.bbpGuardPre) window.bbpGuardPre(ed);
+});
+JS;
     exit;
 }
 
@@ -93,10 +203,6 @@ function bbp_pre_paste_box() {
                 .replace(/<\/pre>\s*$/i, '')
                 .replace(/<\/?pre\b[^>]*>/gi, '');
         }
-        function clearBuffer() {
-            if (!navigator.clipboard || !navigator.clipboard.writeText) return;
-            navigator.clipboard.writeText('').catch(function () {});
-        }
         function close() {
             panel.hidden = true;
             input.value = '';
@@ -119,64 +225,22 @@ function bbp_pre_paste_box() {
             }
         }
         function guard(e) {
-            if (!e || e._bbpPre) return;
-            e._bbpPre = true;
-            e.on('keydown', function (ev) {
-                if ((ev.ctrlKey || ev.metaKey) && String(ev.key).toLowerCase() === 'v' && inPre(e)) {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    clearBuffer();
-                    window.bbpOpenPrePanel();
-                }
-            });
-            e.on('paste', function (ev) {
-                if (!inPre(e)) return;
-                ev.preventDefault();
-                ev.stopPropagation();
-                clearBuffer();
-                window.bbpOpenPrePanel();
-            });
-            e.on('contextmenu', function () {
-                if (!inPre(e)) return;
-                clearBuffer();
-            });
+            if (!e || e._bbpPreFmt) return;
+            e._bbpPreFmt = true;
             e.on('BeforeExecCommand', function (ev) {
                 var cmd = String(ev.command || '');
                 var val = String(ev.value || '');
                 if (!inPre(e)) return;
-                if (/^mcePaste/i.test(cmd) || cmd === 'Paste') {
-                    ev.preventDefault();
-                    ev.stopImmediatePropagation();
-                    clearBuffer();
-                    window.bbpOpenPrePanel();
-                    return false;
-                }
                 if (cmd === 'FormatBlock' || cmd === 'mceToggleFormat' || cmd === 'mceBlockQuote' || cmd === 'FontName' || cmd === 'FontSize' || /^h[1-6]$/i.test(val)) {
                     ev.preventDefault();
                     ev.stopImmediatePropagation();
                     return false;
                 }
-            });
+            }, true);
             e.on('NodeChange click', function () {
                 dimFormat(e, inPre(e));
             });
         }
-        document.addEventListener('keydown', function (ev) {
-            if (inPanel(ev.target)) return;
-            if (!(ev.ctrlKey || ev.metaKey) || String(ev.key).toLowerCase() !== 'v') return;
-            var e = ed();
-            if (!e || !inPre(e)) return;
-            ev.preventDefault();
-            ev.stopPropagation();
-            clearBuffer();
-            window.bbpOpenPrePanel();
-        }, true);
-        document.addEventListener('contextmenu', function (ev) {
-            if (inPanel(ev.target)) return;
-            var e = ed();
-            if (!e || !inPre(e)) return;
-            clearBuffer();
-        }, true);
         document.addEventListener('mousedown', function (ev) {
             if (inPanel(ev.target)) return;
             var e = ed();
@@ -191,9 +255,9 @@ function bbp_pre_paste_box() {
             if (box) dimFormat(e, true);
         }, true);
         function boot() { guard(ed()); }
+        window.bbpGuardPre = guard;
         if (window.tinymce && tinymce.on) tinymce.on('AddEditor', function (evt) { guard(evt.editor); });
         boot();
-        setInterval(boot, 500);
 
         document.getElementById('bbp-pre-cancel').onclick = close;
         document.getElementById('bbp-pre-insert').onclick = function () {
