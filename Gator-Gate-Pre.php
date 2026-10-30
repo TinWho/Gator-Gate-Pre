@@ -29,11 +29,11 @@
  * Other plugins can override it with the 'gg_pre_show_pre_button' filter.
  *
  * For example add either to you funtion.php 
-*   // Hide the Pre button
-*    add_filter( 'gg_pre_show_pre_button', '__return_false' );
-*
-*   // Show the Pre button (force it on)
-*   add_filter( 'gg_pre_show_pre_button', '__return_true' );
+ *   // Hide the Pre button
+ *    add_filter( 'gg_pre_show_pre_button', '__return_false' );
+ *
+ *   // Show the Pre button (force it on)
+ *   add_filter( 'gg_pre_show_pre_button', '__return_true' );
  *
  *
  * The admin area is left completely untouched except for the two checkboxes
