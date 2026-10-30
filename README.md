@@ -9,7 +9,7 @@ The objective is simple: provide bbPress with a clean, controlled, and lightweig
 
 This project was originally distributed as standalone PHP code snippets and has since been developed into a standalone WordPress plugin, which is currently awaiting WordPress.org review.
 
-The original PHP snippets and plugin files are retained here for historical and reference purposes only. Neither is maintained or recommended for installation.
+The original PHP snippets and plugin files are retained here for historical and reference purposes only. They may receive periodic updates but are not actively maintained or recommended for installation.
 
 As the project is released under the GPL licence, the archived source code remains available for others to explore, learn from, modify or incorporate into their own projects, in accordance with the licence terms. Hopefully, others may find elements of the code useful or build upon the work.
 
