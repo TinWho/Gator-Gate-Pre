@@ -22,6 +22,8 @@ One of the useful features of Gator-Gate-Pre is the ability to enable or disable
 
 Rather than forcing the Visual Editor on every forum or requiring additional plugins and complicated configuration, Gator Gate gives administrators a simple checkbox to control where visual editing is available.
 
+![](images/gator-gate-pre.jpg)
+
 This provides flexibility for different types of discussions:
 
 - Forums that benefit from visual editing can have it enabled.
@@ -84,7 +86,7 @@ Gator Gate is built around a few straightforward principles:
 
 Another example of the Gator Gate approach is how we store the per-forum checkbox settings.
 
-Rather than creating a separate database table or introducing another storage mechanism, Gator Gate piggybacks on the existing WordPress forum post metadata.
+Rather than creating a separate database table or introducing another storage mechanism, Gator Gate piggybacks on the existing WordPress forum post metadata. This is actually an appropriate place to store per-forum information. 
 
 WordPress already provides a metadata system for storing additional information against individual posts, including bbPress forums. It also provides metadata caching, allowing these saved settings to benefit from WordPress's existing caching infrastructure.
 
@@ -102,8 +104,6 @@ It's another example of avoiding unnecessary infrastructure. Instead of building
 
 ---
 
-
-![](images/gator-gate-pre.jpg)
 
 ### Archived Project – Historical Reference
 
