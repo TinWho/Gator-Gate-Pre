@@ -86,7 +86,7 @@ Gator Gate is built around a few straightforward principles:
 
 Another example of the Gator Gate approach is how we store the per-forum checkbox settings.
 
-Rather than creating a separate database table or introducing another storage mechanism, Gator Gate piggybacks on the existing WordPress forum post metadata. This is actually an appropriate place to store per-forum information. 
+Rather than creating a separate database table or introducing another storage mechanism, Gator Gate piggybacks on the existing WordPress forum post metadata. This is actually an appropriate place to store per-forum information, as the settings belong directly to individual forum records.
 
 WordPress already provides a metadata system for storing additional information against individual posts, including bbPress forums. It also provides metadata caching, allowing these saved settings to benefit from WordPress's existing caching infrastructure.
 
