@@ -1,0 +1,100 @@
+
+ /* ============================================================
+   Gator Gate Pre – front-end forum content line spacing
+   Values use rem so they scale with the root font size.
+   1rem ≈ 16px on most sites.
+
+   Note: Visual editor (TinyMCE) content line-spacing rules live in
+   includes/class-gg-pre.php inside the add_content_style() method.
+   ============================================================ */
+
+/* Base line height (main control for overall text tightness) */
+#bbpress-forums .bbp-topic-content,
+#bbpress-forums .bbp-reply-content {
+    line-height: 1.15 !important; /* lower = tighter lines */
+}
+
+/* Paragraphs */
+#bbpress-forums .bbp-topic-content p,
+#bbpress-forums .bbp-reply-content p {
+    margin: 0.05rem 0 !important; /* vertical space between paragraphs – lower = tighter */
+    line-height: 1.15 !important;
+}
+
+#bbpress-forums .bbp-topic-content p:last-child,
+#bbpress-forums .bbp-reply-content p:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* Headings */
+#bbpress-forums .bbp-topic-content h1,
+#bbpress-forums .bbp-topic-content h2,
+#bbpress-forums .bbp-topic-content h3,
+#bbpress-forums .bbp-topic-content h4,
+#bbpress-forums .bbp-topic-content h5,
+#bbpress-forums .bbp-topic-content h6,
+#bbpress-forums .bbp-reply-content h1,
+#bbpress-forums .bbp-reply-content h2,
+#bbpress-forums .bbp-reply-content h3,
+#bbpress-forums .bbp-reply-content h4,
+#bbpress-forums .bbp-reply-content h5,
+#bbpress-forums .bbp-reply-content h6 {
+    margin-top: 0.5rem !important;    /* space above headings */
+    margin-bottom: 0.3rem !important; /* space below headings */
+    line-height: 1.15 !important;
+}
+
+/* First heading (pulls content up to reduce top gap) */
+#bbpress-forums .bbp-topic-content > h1:first-child,
+#bbpress-forums .bbp-topic-content > h2:first-child,
+#bbpress-forums .bbp-topic-content > h3:first-child,
+#bbpress-forums .bbp-topic-content > h4:first-child,
+#bbpress-forums .bbp-topic-content > h5:first-child,
+#bbpress-forums .bbp-topic-content > h6:first-child,
+#bbpress-forums .bbp-reply-content > h1:first-child,
+#bbpress-forums .bbp-reply-content > h2:first-child,
+#bbpress-forums .bbp-reply-content > h3:first-child,
+#bbpress-forums .bbp-reply-content > h4:first-child,
+#bbpress-forums .bbp-reply-content > h5:first-child,
+#bbpress-forums .bbp-reply-content > h6:first-child {
+    margin-top: -1.2rem !important; /* negative = pulls first heading upward */
+    padding-top: 0 !important;
+}
+
+/* First paragraph (pulls content up to reduce top gap) */
+#bbpress-forums .bbp-topic-content > p:first-child,
+#bbpress-forums .bbp-reply-content > p:first-child {
+    margin-top: -1.2rem !important; /* negative = pulls first paragraph upward */
+    padding-top: 0 !important;
+}
+
+/* Pre / code blocks */
+#bbpress-forums .bbp-topic-content pre,
+#bbpress-forums .bbp-reply-content pre,
+#bbpress-forums .bbp-topic-content .code,
+#bbpress-forums .bbp-reply-content .code,
+#bbpress-forums .bbp-topic-content code,
+#bbpress-forums .bbp-reply-content code {
+    display: block !important;
+    margin: 0.75rem 0 !important; /* space above and below code blocks */
+    padding: 0.5rem !important;   /* internal padding inside code blocks */
+    line-height: 1.15 !important;
+}
+
+/* First pre (pulls content up to reduce top gap) */
+#bbpress-forums .bbp-topic-content > pre:first-child,
+#bbpress-forums .bbp-reply-content > pre:first-child {
+    margin-top: -0.4rem !important; /* negative = pulls first code block upward */
+}
+
+/* Last pre */
+#bbpress-forums .bbp-topic-content > pre:last-child,
+#bbpress-forums .bbp-reply-content > pre:last-child {
+    margin-bottom: 0.5rem !important;
+}
+
+/* Line breaks */
+#bbpress-forums .bbp-topic-content br,
+#bbpress-forums .bbp-reply-content br {
+    margin: 0.25rem 0; /* small space around <br> tags */
+}
