@@ -5,15 +5,17 @@ Gator-Gate-Pre also forms part of the broader Gator-Gate modular architecture. T
 
 The objective is simple: provide bbPress with a clean, controlled, and lightweight way to handle preformatted content while preserving the underlying philosophy of Gator-Gate — modular features, minimal overhead, and practical functionality without unnecessary complexity.
 
-### Installation & Testing
-This project is currently distributed as standalone PHP code snippets.
-* **Test first**: Run all snippets in a sandbox or staging environment before going live.
-* **Be cautious**: Exercise caution when installing or removing custom backend snippets.
-* **Expect variances**: Database effects and site behaviour may vary depending on your server configuration.
-* **Backup everything**: Always back up your website and database before installing or modifying snippets.
+### Archived Project – Historical Reference
 
-The easiest installation method is to copy and paste the snippets into a WordPress code snippet manager, such as **Fluent Snippets**.
+This project was originally distributed as standalone PHP code snippets and has since been developed into a standalone WordPress plugin, which is currently awaiting WordPress.org review.
 
+The original PHP snippets and plugin files are retained here for historical and reference purposes only. Neither is maintained or recommended for installation.
+
+As the project is released under the GPL licence, the archived source code remains available for others to explore, learn from, modify or incorporate into their own projects, in accordance with the licence terms. Hopefully, others may find elements of the code useful or build upon the work.
+
+Once approved, a link to the official WordPress.org plugin page will be provided here.
+
+Users currently running the original snippets or archived plugin should migrate to the official release and can remove the older versions from their websites.
 
 ### Licensed
 Licensed under GPL v2 or later.
