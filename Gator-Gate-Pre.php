@@ -1,7 +1,7 @@
 /*
  * LAST SINGLE FILE CODE SNIPPET VERSION  
-* Code Snippet:       Gator-Gate-Pre for bbPress
- * Description:        A simple and robust preformatted code block
+ * Code Snippet:      Gator-Gate-Pre for bbPress
+ * Description:       A simple and robust preformatted code block
  * Plugin Name:       Gator Gate Pre for bbPress
  * Plugin URI:        https://tinfoilwho.com
  * Version:           0.8.1-Alpha
