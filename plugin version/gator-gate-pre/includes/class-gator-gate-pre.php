@@ -44,8 +44,10 @@ final class Gator_Gate_Pre {
     private function __construct() {
         $this->hooks();
         add_filter( 'tiny_mce_before_init', array( $this, 'add_content_style' ), 30, 2 );
-        // Print CSS late in the footer so it wins like a Fluent Snippet
-        add_action( 'wp_footer', array( $this, 'print_line_spacing_css' ), 999 );
+        // Enqueue line-spacing CSS the proper way.
+        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_line_spacing_css' ) );
+        // Admin checkbox sync script.
+        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
     }
 
     /**
@@ -173,12 +175,9 @@ final class Gator_Gate_Pre {
     }
 
     /**
-     * Print front-end line-spacing CSS directly in the footer.
-     * Runs on bbPress pages when the line-spacing option is enabled for the forum.
-     * The CSS file is local and trusted. Output is left raw so rules (including negative
-     * margins) are identical to Fluent Snippets.
+     * Enqueue front-end line-spacing CSS when the option is enabled.
      */
-    public function print_line_spacing_css() {
+    public function enqueue_line_spacing_css() {
         if ( ! function_exists( 'is_bbpress' ) || ! is_bbpress() ) {
             return;
         }
@@ -193,14 +192,53 @@ final class Gator_Gate_Pre {
             return;
         }
 
-        $css = file_get_contents( $css_file );
-        if ( ! $css ) {
+        wp_enqueue_style(
+            'gator-gate-pre-line-spacing',
+            GATOR_GATE_PRE_URL . 'assets/css/gator-gate-pre.css',
+            array(),
+            GATOR_GATE_PRE_VERSION
+        );
+    }
+
+    /**
+     * Enqueue admin script that syncs the dependent checkboxes.
+     *
+     * @param string $hook
+     */
+    public function enqueue_admin_scripts( $hook ) {
+        $screen = get_current_screen();
+        if ( ! $screen || 'forum' !== $screen->post_type || 'post' !== $screen->base ) {
             return;
         }
 
-        // Local trusted CSS — output raw so selectors and negative margins are preserved exactly.
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-        echo '<style id="gator-gate-pre-line-spacing">' . $css . '</style>';
+        wp_register_script( 'gator-gate-pre-admin', false, array(), GATOR_GATE_PRE_VERSION, true );
+        wp_enqueue_script( 'gator-gate-pre-admin' );
+
+        $js = <<<'JS'
+(function () {
+    var visual    = document.getElementById('gator_gate_pre_visual_editor');
+    var hide      = document.getElementById('gator_gate_pre_hide_code_tab');
+    var lineSpace = document.getElementById('gator_gate_pre_change_line_space');
+    if (!visual || !hide || !lineSpace) return;
+
+    function sync() {
+        if (!visual.checked) {
+            hide.checked = false;
+            hide.disabled = true;
+            lineSpace.checked = false;
+            lineSpace.disabled = true;
+        } else {
+            hide.disabled = false;
+            lineSpace.disabled = false;
+        }
+    }
+
+    visual.addEventListener('change', sync);
+    sync();
+})();
+JS;
+
+        wp_add_inline_script( 'gator-gate-pre-admin', $js );
     }
 
     /**
@@ -365,29 +403,6 @@ final class Gator_Gate_Pre {
             <br />
             <span class="description"><?php esc_html_e( 'Only available when the Visual Editor is enabled. Applies tighter line-height and paragraph/heading margins in the visual editor and on the front end.', 'gator-gate-pre' ); ?></span>
         </p>
-        <script>
-        (function () {
-            var visual    = document.getElementById('gator_gate_pre_visual_editor');
-            var hide      = document.getElementById('gator_gate_pre_hide_code_tab');
-            var lineSpace = document.getElementById('gator_gate_pre_change_line_space');
-            if (!visual || !hide || !lineSpace) return;
-
-            function sync() {
-                if (!visual.checked) {
-                    hide.checked = false;
-                    hide.disabled = true;
-                    lineSpace.checked = false;
-                    lineSpace.disabled = true;
-                } else {
-                    hide.disabled = false;
-                    lineSpace.disabled = false;
-                }
-            }
-
-            visual.addEventListener('change', sync);
-            sync();
-        })();
-        </script>
         <?php
     }
 
