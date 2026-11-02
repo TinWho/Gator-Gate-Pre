@@ -1,5 +1,5 @@
 === Gator Gate Pre for bbPress ===
-Contributors: tinfoilwho
+Contributors: tinwho
 Tags: bbpress, tinymce, pre, code, visual-editor
 Requires at least: 5.8
 Tested up to: 7.1
